@@ -67,17 +67,29 @@ func main() {
 		return
 	}
 
+	// Asumiendo que la primera fila es el encabezado, la omitimos
+	records = records[1:]
+
 	// Convertir los registros CSV en puntos de datos
 	var points []DataPoint
 	for _, record := range records {
 		var dimensions []float64
-		for _, value := range record {
-			number, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
-			if err != nil {
-				fmt.Println("Error al convertir el valor a float:", err)
-				return
+		for j, value := range record {
+			trimmedValue := strings.TrimSpace(value)
+			if j == 7 { // Índice de la columna "Hábitos de Fumar"
+				if trimmedValue == "Sí" {
+					dimensions = append(dimensions, 1.0)
+				} else {
+					dimensions = append(dimensions, 0.0)
+				}
+			} else {
+				number, err := strconv.ParseFloat(trimmedValue, 64)
+				if err != nil {
+					fmt.Println("Error al convertir el valor a float:", err)
+					return
+				}
+				dimensions = append(dimensions, number)
 			}
-			dimensions = append(dimensions, number)
 		}
 		points = append(points, DataPoint{Dimensions: dimensions})
 	}
